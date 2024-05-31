@@ -12,7 +12,7 @@ function M.setup(options)
 			vim.cmd("Oil " .. res.dir)
 		end)
 	end, {
-		desc = "Live grep in selected directory",
+		desc = "Search for a directory and open it in Oil",
 	})
 end
 
