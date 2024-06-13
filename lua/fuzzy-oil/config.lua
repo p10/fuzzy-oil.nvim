@@ -2,10 +2,15 @@ local M = {}
 
 ---@class Options
 local defaults = {
-  hidden = true,
   debug = false,
-  no_ignore = false,
   show_preview = true,
+  find_command = {
+    'fd',
+    '--type',
+    'd',
+    '--color',
+    'never',
+  },
 }
 
 ---@type Options

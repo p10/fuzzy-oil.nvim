@@ -14,44 +14,6 @@ function M.get_dirs(opts, fn)
     time.start('get_dirs')
   end
 
-  local find_command = (function()
-    if 1 == vim.fn.executable('fd') then
-      return { 'fd', '--type', 'd', '--color', 'never' }
-    elseif 1 == vim.fn.executable('find') and vim.fn.has('win32') == 0 then
-      return { 'find', '.', '-type', 'd' }
-    end
-  end)()
-
-  if not find_command then
-    vim.notify('fuzzy-oil: You need to install either find, fd', vim.log.levels.ERROR)
-    return
-  end
-
-  local command = find_command[1]
-  local hidden = opts.hidden
-  local no_ignore = opts.no_ignore
-
-  if command == 'fd' then
-    if hidden then
-      find_command[#find_command + 1] = '--hidden'
-    end
-    if no_ignore then
-      find_command[#find_command + 1] = '--no-ignore'
-    end
-  elseif command == 'find' then
-    if not hidden then
-      for _, v in ipairs({ '-not', '-path', '*/.*' }) do
-        table.insert(find_command, v)
-      end
-    end
-    if no_ignore ~= nil then
-      vim.notify(
-        'fuzzy-oil: The `no_ignore` key is not available for the `find` command',
-        vim.log.levels.WARN
-      )
-    end
-  end
-
   local function getPreviewer()
     if opts.show_preview then
       return conf.file_previewer(opts)
@@ -60,7 +22,7 @@ function M.get_dirs(opts, fn)
     end
   end
 
-  vim.fn.jobstart(find_command, {
+  vim.fn.jobstart(opts.find_command, {
     stdout_buffered = true,
     on_stdout = function(_, data)
       if data then
@@ -68,7 +30,7 @@ function M.get_dirs(opts, fn)
           return el ~= ''
         end, data)
         pickers
-          .new(opts, {
+          .new({}, {
             prompt_title = 'Select a Directory',
             finder = finders.new_table({
               results = filtered,
